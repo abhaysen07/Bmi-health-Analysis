@@ -1,0 +1,170 @@
+🔹 PART 1: Importing Libraries
+python
+Copy
+Edit
+import MySQLdb
+import pandas as pd
+import matplotlib.pyplot as plt
+%matplotlib inline
+import seaborn as sns
+MySQLdb: Python interface for MySQL databases (used for connecting and querying the DB).
+
+pandas: For handling and analyzing structured data (DataFrame).
+
+matplotlib.pyplot: For plotting graphs and visualizations.
+
+%matplotlib inline: Used in Jupyter notebooks to display plots inline.
+
+seaborn: For enhanced data visualizations (though it's not used later in the code).
+
+🔹 PART 2: Connect to MySQL Database
+python
+Copy
+Edit
+db = MySQLdb.connect("localhost", "root", "8881", "bmi")
+cursor = db.cursor()
+Connects to a MySQL database named bmi on localhost.
+
+Username: root, Password: 8881.
+
+cursor is used to execute SQL commands.
+
+🔹 PART 3: SQL Queries to Extract Data
+python
+Copy
+Edit
+sql1 = "select * from data"
+People = "select count(Gender) from data"
+no_male = "select count(Gender) from data where Gender = 'Male'"
+no_female = "select count(Gender) from data where Gender = 'Female'"
+These are the SQL queries:
+
+sql1: Fetches all records.
+
+People: Counts total number of records.
+
+no_male and no_female: Count number of Male and Female entries respectively.
+
+🔹 PART 4: Execute Queries and Print Stats
+python
+Copy
+Edit
+cursor.execute(sql1)
+result1 = cursor.fetchall()
+
+cursor.execute(People)
+e = (cursor.fetchone()[0])
+print(type(e))
+print("Total No. of Peoples:", e)
+
+cursor.execute(no_male)
+no_males = float((cursor.fetchone()[0]))
+print("Total No. of Males:", int(no_males))
+
+cursor.execute(no_female)
+no_females = float((cursor.fetchone()[0]))
+print("Total No. of Females:", int(no_females))
+Executes SQL queries and stores results.
+
+fetchone() returns a tuple with one row, [0] extracts the value.
+
+result1 contains all the data records.
+
+Prints counts of total people, males, and females.
+
+🔹 PART 5: Calculate Gender Percentages
+python
+Copy
+Edit
+prt_m = ((no_males/float(e))*100)
+print("Percentage of Males: " + str(prt_m) + "%")
+
+prt_f = ((no_females/float(e))*100)
+print("Percentage of Females:" + str(prt_f) + "%")
+Computes and prints the percentage of Males and Females in the dataset.
+
+🔹 PART 6: Convert SQL Result to Pandas DataFrame
+python
+Copy
+Edit
+index = [int(i) for i in range(1,501)]
+df = pd.DataFrame(list(result1), index = index)
+df.columns = ['Gender','Height_m','Weight_kg','BMI','Index']
+a = df
+Converts SQL result to DataFrame df.
+
+Adds column names.
+
+index is a list from 1 to 500 — used as the DataFrame index.
+
+🔹 PART 7: Check for Missing Values
+python
+Copy
+Edit
+a.isnull().any()
+Checks if any column contains missing (NaN) values. Returns a boolean for each column.
+
+🔹 PART 8: Add a Categorical ‘Status’ Column Based on BMI Index
+python
+Copy
+Edit
+def convert_status_to_description(x):
+    if x['Index'] == 0:
+        return 'Extremely Weak'
+    elif x['Index'] == 1:
+        return 'Weak'
+    elif x['Index'] == 2:
+        return 'Normal'
+    elif x['Index'] == 3:
+        return 'Overweight'
+    elif x['Index']== 4:
+        return 'Obesity'
+    elif x['Index'] == 5:
+        return 'Extreme Obesity'
+
+a['Status'] = a.apply(convert_status_to_description,axis=1)
+print(a)
+Function to map the numeric 'Index' to health status categories.
+
+apply(..., axis=1) applies this function row-wise.
+
+Adds a new column called Status.
+
+🔹 PART 9: Create Histogram of BMI
+python
+Copy
+Edit
+df.hist(column='BMI', bins=4)
+plt.axis([10, 80, 0, 250])
+plt.savefig('output.jpg')
+Creates a histogram of BMI values using 4 bins (BMI ranges).
+
+plt.axis() sets axis ranges:
+
+X-axis (BMI): 10 to 80
+
+Y-axis (Count): 0 to 250
+
+plt.savefig() saves the chart as an image output.jpg.
+
+🔹 PART 10: Final Steps
+python
+Copy
+Edit
+db.close()
+plt.show()
+Closes the database connection.
+
+Displays the saved plot.
+
+✅ Summary of Tasks Performed
+Step	Task
+1	Imported necessary libraries (MySQL, Pandas, Matplotlib, etc.)
+2	Connected to the MySQL database named bmi
+3	Queried data using SQL (all rows, total people, male/female count)
+4	Loaded SQL result into a Pandas DataFrame
+5	Printed gender statistics and percentages
+6	Checked for missing values
+7	Added a Status column with readable BMI categories
+8	Created and saved a histogram of the BMI data
+9	Closed database connection and displayed the plot
